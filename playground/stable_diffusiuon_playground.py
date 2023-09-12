@@ -5,9 +5,13 @@ from torch import autocast
 from diffusers import StableDiffusionPipeline
 import matplotlib.pyplot as plt
 
+import json
+with open('./token.json', 'r') as f:
+  data_token = json.load(f)
+  
 from huggingface_hub import login
 
-login("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")
+login(data_token["token"])
 
 
 def plt_show_image(image):
