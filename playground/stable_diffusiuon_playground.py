@@ -58,7 +58,7 @@ def create_simple_img(pipe, prompt, img_name, generator=None, num_inference_step
 
 
 def create_video(images, video_name):
-    shape = (480, 640)
+    shape = (512, 512)
     output_path = f'./playground_imgs/{video_name}.mp4'
     with media.VideoWriter(output_path, shape=shape, fps=10) as w:
         for image in images:
@@ -92,14 +92,14 @@ def simple_generation_diffuser_step_vis():
     def save_latents(i, t, latents):
         latents_reservoir.append(latents.detach().cpu())
 
-    # Uncoment if you want to visualize diffuzer steps
-    # prompt = "a handsome cat dressed like Lincoln, trending art."
-    # with torch.no_grad():
-    #     image = pipe(prompt, callback=plot_show_callback).images[0]
+    # Uncomment if you want to visualize diffuzer steps
+    prompt = "a handsome cat dressed like Lincoln, trending art."
+    with torch.no_grad():
+        image = pipe(prompt, callback=plot_show_callback).images[0]
 
-    # image.save(f"./playground_imgs/lovely_cat_lincoln.png")
+    image.save(f"./playground_imgs/lovely_cat_lincoln.png")
     
-    # create_video(np.array(image_reservoir), "difuser_steps")
+    create_video(np.array(image_reservoir), "difuser_steps")
 
 def simple_sampling_fun():
     pass
