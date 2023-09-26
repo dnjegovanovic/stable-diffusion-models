@@ -11,6 +11,9 @@ from pathlib import Path
 import json
 import numpy as np
 import torchvision
+from argparse import ArgumentParser
+
+from fun import *
 
 with open("./token.json", "r") as f:
     data_token = json.load(f)
@@ -26,6 +29,13 @@ def plt_show_image(image):
     plt.axis("off")
     plt.tight_layout()
     plt.show()
+
+def plt_save_image(image,save_path):
+    plt.figure(figsize=(8, 8))
+    plt.imshow(image)
+    plt.axis("off")
+    plt.tight_layout()
+    plt.savefig(save_path)
 
 
 def create_pipe():
@@ -59,10 +69,11 @@ def create_simple_img(pipe, prompt, img_name, generator=None, num_inference_step
 
 def create_video(images, video_name):
     shape = (512, 512)
-    output_path = f'./playground_imgs/{video_name}.mp4'
+    output_path = f"./playground_imgs/{video_name}.mp4"
     with media.VideoWriter(output_path, shape=shape, fps=10) as w:
         for image in images:
             w.add_image(image)
+
 
 def simple_generation_diffuser_step_vis():
     generator = torch.Generator("cuda").manual_seed(1024)
@@ -85,7 +96,9 @@ def simple_generation_diffuser_step_vis():
         image = (image / 2 + 0.5).clamp(0, 1)
         image = image.cpu().permute(0, 2, 3, 1).float().numpy()[0]
         # plt_show_image(image)
-        plt.imsave(f"./playground_imgs/diff_steps/diffprocess_sample_{i:02d}.png", image)
+        plt.imsave(
+            f"./playground_imgs/diff_steps/diffprocess_sample_{i:02d}.png", image
+        )
         image_reservoir.append(image)
 
     @torch.no_grad()
@@ -98,11 +111,27 @@ def simple_generation_diffuser_step_vis():
         image = pipe(prompt, callback=plot_show_callback).images[0]
 
     image.save(f"./playground_imgs/lovely_cat_lincoln.png")
-    
+
     create_video(np.array(image_reservoir), "difuser_steps")
 
-def simple_sampling_fun():
-    pass
+def debug_sampling_fun():
+    pipe = create_pipe()
+    img = simple_sampling_fun(pipe)
+    plt_save_image(img, "./playground_imgs/debug-sampling-fun.png")
+
+
+def main(args):
+    if args.simple_gen:
+        simple_generation_diffuser_step_vis()
+    elif args.debug_simple_sampling:
+        debug_sampling_fun()
 
 if __name__ == "__main__":
-    simple_generation_diffuser_step_vis()
+    parser = ArgumentParser(add_help=True)
+    parser.add_argument("--simple-gen", action="store_true", help="path to .dna file")
+    parser.add_argument("--debug-simple-sampling", action="store_true", help="path to dataset")
+    args = parser.parse_args()
+    main(args)
+    
+    
+    
