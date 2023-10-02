@@ -11,10 +11,9 @@ from argparse import ArgumentParser
 import requests
 from io import BytesIO
 from PIL import Image
-6
 
-from fun import *
-from misc import *
+from playground.fun import *
+from playground.misc import *
 
 with open("./token.json", "r") as f:
     data_token = json.load(f)
@@ -32,7 +31,7 @@ def image_to_image_test(print_model_shape=True):
         model_path, revision="fp16", torch_dtype=torch.float16, use_auth_token=True
     )
     pipe = pipe.to(device)
-    
+
     if print_model_shape:
         # recursive_print(pipe.text_encoder, deepest=3)
         # recursive_print(pipe.text_encoder.text_model.encoder, deepest=3)
@@ -154,16 +153,16 @@ def main(args):
         image_to_image_test()
 
 
-if __name__ == "__main__":
-    parser = ArgumentParser(add_help=True)
-    parser.add_argument("--simple-gen", action="store_true", help="Simple test")
-    parser.add_argument(
-        "--debug-simple-sampling", action="store_true", help="path to dataset"
-    )
-    parser.add_argument(
-        "--image-to-image",
-        action="store_true",
-        help="Test image to image process",
-    )
-    args = parser.parse_args()
-    main(args)
+# if __name__ == "__main__":
+#     parser = ArgumentParser(add_help=True)
+#     parser.add_argument("--simple-gen", action="store_true", help="Simple test")
+#     parser.add_argument(
+#         "--debug-simple-sampling", action="store_true", help="path to dataset"
+#     )
+#     parser.add_argument(
+#         "--image-to-image",
+#         action="store_true",
+#         help="Test image to image process",
+#     )
+#     args = parser.parse_args()
+#     main(args)

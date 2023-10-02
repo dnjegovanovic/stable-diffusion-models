@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 
+
 @torch.no_grad()
 def simple_sampling_fun(
     pipe,
@@ -105,11 +106,10 @@ def generate_img2img_simplified(
     negative_prompt=[""],
     num_inference_steps=50,
     guidance_scale=7.5,
-    batch_size = 1,
-    strength = 0.5 # strength of the image conditioning
-
+    batch_size=1,
+    strength=0.5,  # strength of the image conditioning
 ):
-    do_classifier_free_guidance=False
+    do_classifier_free_guidance = False
 
     # here `guidance_scale` is defined analog to the guidance weight `w` of equation (2)
     # of the Imagen paper: https://arxiv.org/pdf/2205.11487.pdf . `guidance_scale = 1`
@@ -162,7 +162,9 @@ def generate_img2img_simplified(
     timesteps = torch.tensor([timesteps] * batch_size, device=pipe.device)
 
     # add noise to latents using the timesteps
-    noise = torch.randn(init_latents.shape, generator=generator, device=pipe.device, dtype=latents_dtype)
+    noise = torch.randn(
+        init_latents.shape, generator=generator, device=pipe.device, dtype=latents_dtype
+    )
     init_latents = pipe.scheduler.add_noise(init_latents, noise, timesteps)
 
     latents = init_latents
@@ -174,18 +176,26 @@ def generate_img2img_simplified(
 
     for i, t in enumerate(pipe.progress_bar(timesteps)):
         # expand the latents if we are doing classifier free guidance
-        latent_model_input = torch.cat([latents] * 2) if do_classifier_free_guidance else latents
+        latent_model_input = (
+            torch.cat([latents] * 2) if do_classifier_free_guidance else latents
+        )
         latent_model_input = pipe.scheduler.scale_model_input(latent_model_input, t)
 
         # predict the noise residual
-        noise_pred = pipe.unet(latent_model_input, t, encoder_hidden_states=text_embeddings).sample
+        noise_pred = pipe.unet(
+            latent_model_input, t, encoder_hidden_states=text_embeddings
+        ).sample
 
         # perform guidance
         noise_pred_uncond, noise_pred_text = noise_pred.chunk(2)
-        noise_pred = noise_pred_uncond + guidance_scale * (noise_pred_text - noise_pred_uncond)
+        noise_pred = noise_pred_uncond + guidance_scale * (
+            noise_pred_text - noise_pred_uncond
+        )
 
         # compute the previous noisy sample x_t -> x_t-1
-        latents = pipe.scheduler.step(noise_pred, t, latents, **extra_step_kwargs).prev_sample
+        latents = pipe.scheduler.step(
+            noise_pred, t, latents, **extra_step_kwargs
+        ).prev_sample
 
     latents = 1 / 0.18215 * latents
     image = pipe.vae.decode(latents).sample
@@ -194,9 +204,10 @@ def generate_img2img_simplified(
     image = image.cpu().permute(0, 2, 3, 1).numpy()
     return image
 
+
 def recursive_print(module, prefix="", depth=0, deepest=3):
     """Simulating print(module) for torch.nn.Modules
-        but with depth control. Print to the `deepest` level. `deepest=0` means no print
+    but with depth control. Print to the `deepest` level. `deepest=0` means no print
     """
     if depth == 0:
         print(f"[{type(module).__name__}]")
