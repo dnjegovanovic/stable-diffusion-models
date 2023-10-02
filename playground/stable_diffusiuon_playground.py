@@ -1,19 +1,20 @@
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
-from torch import autocast
 from diffusers import StableDiffusionPipeline
+from diffusers import StableDiffusionImg2ImgPipeline
 import matplotlib.pyplot as plt
-import itertools
-import math
 import mediapy as media
-from pathlib import Path
 import json
 import numpy as np
-import torchvision
 from argparse import ArgumentParser
 
+import requests
+from io import BytesIO
+from PIL import Image
+6
+
 from fun import *
+from misc import *
 
 with open("./token.json", "r") as f:
     data_token = json.load(f)
@@ -23,19 +24,42 @@ from huggingface_hub import login
 login(data_token["token"])
 
 
-def plt_show_image(image):
-    plt.figure(figsize=(8, 8))
-    plt.imshow(image)
-    plt.axis("off")
-    plt.tight_layout()
-    plt.show()
+def image_to_image_test(print_model_shape=True):
+    device = "cuda"
+    model_path = "CompVis/stable-diffusion-v1-4"
 
-def plt_save_image(image,save_path):
-    plt.figure(figsize=(8, 8))
-    plt.imshow(image)
-    plt.axis("off")
-    plt.tight_layout()
-    plt.savefig(save_path)
+    pipe = StableDiffusionImg2ImgPipeline.from_pretrained(
+        model_path, revision="fp16", torch_dtype=torch.float16, use_auth_token=True
+    )
+    pipe = pipe.to(device)
+    
+    if print_model_shape:
+        # recursive_print(pipe.text_encoder, deepest=3)
+        # recursive_print(pipe.text_encoder.text_model.encoder, deepest=3)
+        # recursive_print(pipe.text_encoder.text_model.encoder.layers[0], deepest=3)
+        # recursive_print(pipe.unet, deepest=2)
+        # recursive_print(pipe.unet.down_blocks[0], deepest=2)
+        # recursive_print(pipe.unet.up_blocks[2], deepest=2)
+        recursive_print(pipe.vae, deepest=3)
+
+    url = "https://raw.githubusercontent.com/CompVis/stable-diffusion/main/assets/stable-samples/img2img/sketch-mountains-input.jpg"
+
+    response = requests.get(url)
+    init_img = Image.open(BytesIO(response.content)).convert("RGB")
+    init_img = init_img.resize((768, 512))
+
+    prompt = "A fantasy landscape, trending on artstation"
+    generator = torch.Generator(device=device).manual_seed(1024)
+    with torch.autocast("cuda"):
+        image = pipe(
+            prompt=prompt,
+            image=init_img,
+            strength=0.75,
+            guidance_scale=7.5,
+            generator=generator,
+        ).images[0]
+
+        plt_save_image(image, "./playground_imgs/img_to_img_01.png")
 
 
 def create_pipe():
@@ -114,6 +138,7 @@ def simple_generation_diffuser_step_vis():
 
     create_video(np.array(image_reservoir), "difuser_steps")
 
+
 def debug_sampling_fun():
     pipe = create_pipe()
     img = simple_sampling_fun(pipe)
@@ -125,13 +150,20 @@ def main(args):
         simple_generation_diffuser_step_vis()
     elif args.debug_simple_sampling:
         debug_sampling_fun()
+    elif args.image_to_image:
+        image_to_image_test()
+
 
 if __name__ == "__main__":
     parser = ArgumentParser(add_help=True)
-    parser.add_argument("--simple-gen", action="store_true", help="path to .dna file")
-    parser.add_argument("--debug-simple-sampling", action="store_true", help="path to dataset")
+    parser.add_argument("--simple-gen", action="store_true", help="Simple test")
+    parser.add_argument(
+        "--debug-simple-sampling", action="store_true", help="path to dataset"
+    )
+    parser.add_argument(
+        "--image-to-image",
+        action="store_true",
+        help="Test image to image process",
+    )
     args = parser.parse_args()
     main(args)
-    
-    
-    
