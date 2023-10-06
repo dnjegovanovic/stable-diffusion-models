@@ -24,5 +24,5 @@ if __name__ == "__main__":
         action="store_true",
         help="Test image to image process",
     )
-    
+
     main(parser.parse_args())
