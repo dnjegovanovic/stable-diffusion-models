@@ -43,16 +43,20 @@ class ResBlock(nn.Module):
         # Final conv layer
         self.norm_2 = nn.GroupNorm(32, out_channels, eps=1e-05, affine=True)
         self.dropout = nn.Dropout2d(p=0.0, inplace=False)
-        self.conv_2 = nn.Conv2d(out_channels,out_channels, kernel_size=3,stride=1,padding=1)
+        self.conv_2 = nn.Conv2d(
+            out_channels, out_channels, kernel_size=3, stride=1, padding=1
+        )
         self.nonlinearity = nn.SiLU()
-        
-        #chanel to out_chanel mapping layer for residual
+
+        # chanel to out_chanel mapping layer for residual
         if num_in_channels == out_channels:
             self.conv_shortcut = nn.Identity()
         else:
-            self.conv_shortcut = nn.Conv2d(num_in_channels, out_channels, kernel_size=3, stride=1, padding=1)
-            
-    def forward(self, x: torch.Tensor, t_emb:torch.Tensor):
+            self.conv_shortcut = nn.Conv2d(
+                num_in_channels, out_channels, kernel_size=3, stride=1, padding=1
+            )
+
+    def forward(self, x: torch.Tensor, t_emb: torch.Tensor):
         """_summary_
 
         Args:
@@ -64,17 +68,17 @@ class ResBlock(nn.Module):
         h = self.norm_1(x)
         h = self.nonlinearity(h)
         h = self.conv_1(h)
-        
+
         # Add time step emb
         if t_emb is not None:
             t_hidden = self.emb_time_proj(self.nonlinearity(t_emb))
-            h = h + t_hidden[:,:,None,None]
-        
+            h = h + t_hidden[:, :, None, None]
+
         # Output conv
         h = self.norm2(h)
         h = self.nonlinearity(h)
         h = self.dropout(h)
         h = self.conv2(h)
-        
+
         # Skip connection
         return h + self.conv_shortcut(x)
