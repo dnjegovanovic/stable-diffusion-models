@@ -13,5 +13,5 @@ class DownSaple(nn.Module):
         super().__init__(*args, **kwargs)
         self.conv = nn.Conv2d(num_chanels, num_chanels, kernel_size=3, stride=1)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         return self.conv(x)

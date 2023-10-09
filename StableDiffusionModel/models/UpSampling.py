@@ -24,6 +24,6 @@ class UpSample(nn.Module):
             num_chanles, num_chanles, kernel_size=3, stride=1, padding=1
         )
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         x = F.interpolate(x, scale_factor=self.scale_factor, mode=self.mode)
         return self.conv(x)
