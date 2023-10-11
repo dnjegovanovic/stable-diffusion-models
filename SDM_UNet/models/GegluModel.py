@@ -21,7 +21,7 @@ class FeedForwardGEGLU(nn.Module):
     # https://github.com/huggingface/diffusers/blob/95414bd6bf9bb34a312a7c55f10ba9b379f33890/src/diffusers/models/attention.py#L339
     # A variant of the gated linear unit activation function from https://arxiv.org/abs/2002.05202.
     def __init__(self, hidden_dim, mult=4):
-        super(FeedForward_GEGLU, self).__init__()
+        super().__init__()
         self.net = nn.Sequential(
             GEGLUproj(hidden_dim, mult * hidden_dim),
             nn.Dropout(0.0),
