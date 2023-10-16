@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from einops import rearrange
 
-from TransformerBlock import *
+from .TransformerBlock import *
 
 
 class SpatialTransformer(nn.Module):
@@ -14,24 +14,24 @@ class SpatialTransformer(nn.Module):
     ) -> None:
         super().__init__(*args, **kwargs)
 
-        self.norm_layer = nn.GroupNorm(32, hidden_dim, eps=1e-6, affine=True)
-        self.projection_input = nn.Conv2d(
+        self.norm = nn.GroupNorm(32, hidden_dim, eps=1e-6, affine=True)
+        self.proj_in = nn.Conv2d(
             hidden_dim, hidden_dim, kernel_size=1, stride=1, padding=0
         )
         # compatibility with Diffuser, could simplify.
-        self.transformer_block = nn.Sequential(
+        self.transformer_blocks = nn.Sequential(
             TransformerBlock(hidden_dim, context_dim, num_heads)
         )
-        self.projection_output = nn.Conv2d(
+        self.proj_out = nn.Conv2d(
             hidden_dim, hidden_dim, kernel_size=1, stride=1, padding=0
         )
 
-    def forward(self, x: torch.Tensor, cond=None):
+    def forward(self, x: torch.Tensor, cond=None, cross_attention_kwargs=None):
         b, c, h, w = x.shape
-        x_in_tmp = x
-        x = self.projection_input(self.norm_layer(c))
+        x_in = x
+        # context = rearrange(context, "b c T -> b T c")
+        x = self.proj_in(self.norm(x))
         x = rearrange(x, "b c h w->b (h w) c")
-        x = self.transformer_block[0](x, cond)
-        x = rearrange(x, "b (h w) c -> b c h w", h=h, w=w)
-
-        return self.projection_output(x) + x_in_tmp
+        x = self.transformer_blocks[0](x, cond)
+        x = rearrange(x, 'b (h w) c -> b c h w', h=h, w=w)
+        return self.proj_out(x) + x_in

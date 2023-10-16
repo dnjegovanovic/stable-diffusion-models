@@ -7,7 +7,7 @@ class UpSample(nn.Module):
     """Up-sampling layer."""
 
     def __init__(
-        self, num_chanles: int, scale_factor: int, mode="nearest", *args, **kwargs
+        self, num_chanles: int, scale_factor: int = 2, mode="nearest", *args, **kwargs
     ) -> None:
         """_summary_
 
@@ -24,6 +24,6 @@ class UpSample(nn.Module):
             num_chanles, num_chanles, kernel_size=3, stride=1, padding=1
         )
 
-    def forward(self, x: torch.Tensor):
+    def forward(self, x: torch.Tensor, cross_attention_kwargs = None):
         x = F.interpolate(x, scale_factor=self.scale_factor, mode=self.mode)
         return self.conv(x)

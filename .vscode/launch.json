@@ -12,8 +12,9 @@
             "console": "integratedTerminal",
             "justMyCode": true,
             "args": [
-                "--test-playground",
-                "--image-to-image"
+                //"--test-playground",
+                //"--image-to-image",
+                "--test-custom-unet"
             ],
         }
     ]
