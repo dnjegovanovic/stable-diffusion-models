@@ -57,9 +57,9 @@ class UNetStableDiffusion(nn.Module):
         context_dim: int = 768,
         multipliers=(1, 2, 4, 4),
         attn_levels=(0, 1, 2),
-        #num_attention_heads: int = 8,
+        # num_attention_heads: int = 8,
         *args,
-        **kwargs
+        **kwargs,
     ) -> None:
         """Assamble all component for UNet arch
 
@@ -245,7 +245,7 @@ class UNetStableDiffusion(nn.Module):
         cond=None,
         encoder_hidden_states=None,
         output_dict=True,
-        cross_attention_kwargs = None,
+        cross_attention_kwargs=None,
         *args,
         **kwrgs,
     ):
@@ -283,7 +283,7 @@ class UNetStableDiffusion(nn.Module):
         # Final normalization and 3×3 convolution
         x = self.output(x)
         if output_dict:
-            #return edict(sample=x)
+            # return edict(sample=x)
             return (x,)
         else:
             return x

@@ -52,7 +52,9 @@ class ResBlock(nn.Module):
                 self.in_channel, self.out_channel, kernel_size=1, stride=1
             )
 
-    def forward(self, x: torch.Tensor, t_emb: torch.Tensor, cross_attention_kwargs = None):
+    def forward(
+        self, x: torch.Tensor, t_emb: torch.Tensor, cross_attention_kwargs=None
+    ):
         """_summary_
 
         Args:

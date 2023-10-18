@@ -33,5 +33,5 @@ class SpatialTransformer(nn.Module):
         x = self.proj_in(self.norm(x))
         x = rearrange(x, "b c h w->b (h w) c")
         x = self.transformer_blocks[0](x, cond)
-        x = rearrange(x, 'b (h w) c -> b c h w', h=h, w=w)
+        x = rearrange(x, "b (h w) c -> b c h w", h=h, w=w)
         return self.proj_out(x) + x_in

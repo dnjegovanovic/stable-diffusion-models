@@ -15,5 +15,5 @@ class DownSample(nn.Module):
             num_chanels, num_chanels, kernel_size=3, stride=2, padding=1
         )
 
-    def forward(self, x: torch.Tensor, cross_attention_kwargs = None):
+    def forward(self, x: torch.Tensor, cross_attention_kwargs=None):
         return self.conv(x)
