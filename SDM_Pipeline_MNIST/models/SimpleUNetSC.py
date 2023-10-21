@@ -5,7 +5,7 @@ from .GaussianFourierProjection import *
 from .ReshapeOutputToFM import *
 
 
-class SimpleUNet(nn.Module):
+class SimpleUNetSP(nn.Module):
     def __init__(
         self,
         marginal_prob_std,
@@ -15,6 +15,9 @@ class SimpleUNet(nn.Module):
         **kwargs
     ) -> None:
         """Time-dependent score-based network.
+        Spatioal case od SimpleUNet. In this network we directly add the tehsors from
+        the downsampling block for skip connection. In the previouse Simple UNet we concatenate
+        the tensorf from downsampling block
 
         Args:
             marginal_prob_std (_type_): A function that takes time t and gives the standard
@@ -63,7 +66,7 @@ class SimpleUNet(nn.Module):
         self.trans_gnorm_4 = nn.GroupNorm(32, num_channels=self.chanels[2])
 
         self.trans_conv_3 = nn.ConvTranspose2d(
-            self.chanels[2] + self.chanels[2],
+            self.chanels[2],
             self.chanels[1],
             kernel_size=3,
             stride=2,
@@ -74,7 +77,7 @@ class SimpleUNet(nn.Module):
         self.trans_gnorm_3 = nn.GroupNorm(32, num_channels=self.chanels[1])
 
         self.trans_conv_2 = nn.ConvTranspose2d(
-            self.chanels[1] + self.chanels[1],
+            self.chanels[1],
             self.chanels[0],
             kernel_size=3,
             stride=2,
@@ -85,7 +88,7 @@ class SimpleUNet(nn.Module):
         self.trans_gnorm_2 = nn.GroupNorm(32, num_channels=self.chanels[0])
 
         self.trans_conv_1 = nn.ConvTranspose2d(
-            self.chanels[0] + self.chanels[0], 1, kernel_size=3, stride=1
+            self.chanels[0], 1, kernel_size=3, stride=1
         )
 
         self.act_fun = lambda x: x * torch.sigmoid(x)
@@ -121,15 +124,15 @@ class SimpleUNet(nn.Module):
         # Add skip connection
         h += self.ro_dense_5(embed)
         h = self.act_fun(self.trans_conv_4(h))
-        h = self.trans_conv_3(torch.cat([h, h3], dim=1))
+        h = self.trans_conv_3(h, h3, dim=1)
 
         h += self.ro_dense_6(embed)
         h = self.act_fun(self.trans_conv_3(h))
-        h = self.trans_conv_2(torch.cat([h, h2], dim=1))
+        h = self.trans_conv_2(h, h2, dim=1)
 
         h += self.ro_dense_7(embed)
         h = self.act_fun(self.trans_conv_2(h))
-        h = self.trans_conv_1(torch.cat([h, h1], dim=1))
+        h = self.trans_conv_1(h, h1, dim=1)
 
         # Normalize output
         h = h / self.marginal_prob_std(time_feature)[:, None, None, None]
