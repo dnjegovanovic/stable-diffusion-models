@@ -14,8 +14,7 @@ login(data_token["token"])
 
 
 def generate_image(prompt):
-    # TODO Need to match all other argument in with pipe pipeline in order to be able to
-    # proper evalutate. Current err forward() got an unexpected keyword argument 'cross_attention_kwargs'
+
     device = "cuda"
     model_path = "CompVis/stable-diffusion-v1-4"
 
