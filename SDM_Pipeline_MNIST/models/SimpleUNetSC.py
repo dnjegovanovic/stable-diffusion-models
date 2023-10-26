@@ -40,7 +40,7 @@ class SimpleUNetSP(nn.Module):
         self.gnorm_1 = nn.GroupNorm(4, num_channels=self.chanels[0])
 
         self.conv_2 = nn.Conv2d(
-            self.chanels[2], self.chanels[1], kernel_size=3, stride=2, bias=False
+            self.chanels[0], self.chanels[1], kernel_size=3, stride=2, bias=False
         )
         self.ro_dense_2 = RODense(self.embed_dim, self.chanels[1])
         self.gnorm_2 = nn.GroupNorm(32, num_channels=self.chanels[1])
@@ -123,15 +123,15 @@ class SimpleUNetSP(nn.Module):
         h = self.trans_conv_4(h4)
         # Add skip connection
         h += self.ro_dense_5(embed)
-        h = self.act_fun(self.trans_conv_4(h))
+        h = self.act_fun(self.trans_gnorm_4(h))
         h = self.trans_conv_3(h, h3, dim=1)
 
         h += self.ro_dense_6(embed)
-        h = self.act_fun(self.trans_conv_3(h))
+        h = self.act_fun(self.trans_gnorm_3(h))
         h = self.trans_conv_2(h, h2, dim=1)
 
         h += self.ro_dense_7(embed)
-        h = self.act_fun(self.trans_conv_2(h))
+        h = self.act_fun(self.trans_gnorm_2(h))
         h = self.trans_conv_1(h, h1, dim=1)
 
         # Normalize output

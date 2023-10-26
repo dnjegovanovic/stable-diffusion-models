@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 import playground.stable_diffusiuon_playground as pg
 
 from SDM_UNet.scripts.run_main import *
-
+import SDM_Pipeline_MNIST.scripts.test_train_simpleUNet as sunet
 
 def main(args):
     if args.test_playground:
@@ -13,6 +13,7 @@ def main(args):
 
 
 if __name__ == "__main__":
+    sunet.main()
     parser = ArgumentParser(add_help=True)
     parser.add_argument("--test-playground", action="store_true", help="Simple test")
     parser.add_argument("--test-custom-unet", action="store_true", help="Simple test")

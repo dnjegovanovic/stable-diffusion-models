@@ -14,7 +14,6 @@ login(data_token["token"])
 
 
 def generate_image(prompt):
-
     device = "cuda"
     model_path = "CompVis/stable-diffusion-v1-4"
 
