@@ -10,6 +10,7 @@ from torch.utils.data import Subset
 import numpy as np
 import functools
 from torch.optim import Adam
+from torch.optim.lr_scheduler import MultiplicativeLR, LambdaLR
 
 from SDM_Pipeline_MNIST.models.SimpleUNet import *
 from SDM_Pipeline_MNIST.models.SimpleUNetSC import *
@@ -20,11 +21,12 @@ class SimpleUNetModules(pl.LightningModule):
         super().__init__(*args, **kwargs)
         
         self.batch_size = 2048
+        self.num_epochs = 100
         self.sigma = 25.0
         self.euler_maruyam_num_steps = 500
         self.eps_stab = 1e-5
         self.lr = 5e-4
-        self.use_unet_score_based = False
+        self.use_unet_score_based = True
         self._setup_arch()
         self._setup_data()
 
@@ -42,7 +44,7 @@ class SimpleUNetModules(pl.LightningModule):
             ".", train=True, transform=transforms.ToTensor(), download=True
         )
         # use 20% of training data for validation
-        train_set_size = int(len(dataset) * 0.8)
+        train_set_size = int(len(dataset) * 0.95)
         valid_set_size = len(dataset) - train_set_size
 
         # split the train set into two
@@ -173,7 +175,8 @@ class SimpleUNetModules(pl.LightningModule):
             }],
             lr=self.lr
         )
-        return opt_model
+        scheduler = LambdaLR(opt_model, lr_lambda=lambda epoch: max(0.2, 0.98 ** self.num_epochs))
+        return [opt_model], {"scheduler": scheduler}
 
     def train_dataloader(self):
         return DataLoader(

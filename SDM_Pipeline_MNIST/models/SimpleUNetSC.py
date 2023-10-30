@@ -124,15 +124,15 @@ class SimpleUNetSP(nn.Module):
         # Add skip connection
         h += self.ro_dense_5(embed)
         h = self.act_fun(self.trans_gnorm_4(h))
-        h = self.trans_conv_3(h, h3, dim=1)
+        h = self.trans_conv_3(h + h3)
 
         h += self.ro_dense_6(embed)
         h = self.act_fun(self.trans_gnorm_3(h))
-        h = self.trans_conv_2(h, h2, dim=1)
+        h = self.trans_conv_2(h+ h2)
 
         h += self.ro_dense_7(embed)
         h = self.act_fun(self.trans_gnorm_2(h))
-        h = self.trans_conv_1(h, h1, dim=1)
+        h = self.trans_conv_1(h + h1)
 
         # Normalize output
         h = h / self.marginal_prob_std(time_feature)[:, None, None, None]
