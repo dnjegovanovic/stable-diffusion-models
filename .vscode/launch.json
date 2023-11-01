@@ -14,7 +14,9 @@
             "args": [
                 //"--test-playground",
                 //"--image-to-image",
-                "--test-custom-unet"
+                //"--test-custom-unet",
+                "--model",
+                "D:/ML_AI_DL_Projects/projects_repo/stable-diffusion-models/simple_unet_test/test_UnetSB/version_1/checkpoints/epoch=99-step=2800.ckpt"
             ],
         }
     ]

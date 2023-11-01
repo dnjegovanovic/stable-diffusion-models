@@ -20,12 +20,12 @@ class SimpleUNetModules(pl.LightningModule):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         
-        self.batch_size = 2048
+        self.batch_size = 1024
         self.num_epochs = 100
         self.sigma = 25.0
         self.euler_maruyam_num_steps = 500
         self.eps_stab = 1e-5
-        self.lr = 5e-4
+        self.lr = 10e-4
         self.use_unet_score_based = True
         self._setup_arch()
         self._setup_data()
@@ -120,7 +120,7 @@ class SimpleUNetModules(pl.LightningModule):
         t = torch.ones(self.batch_size, device=device)
         init_x = (
             torch.randn(self.batch_size, *x_shape, device=device)
-            * self._marginal_prob_std(t)[:, None, None, None]
+            * self._marginal_prob_std(t,self.sigma)[:, None, None, None]
         )
         time_steps = torch.linspace(
             1.0, eps, self.euler_maruyam_num_steps, device=device
@@ -128,11 +128,11 @@ class SimpleUNetModules(pl.LightningModule):
         step_size = time_steps[0] - time_steps[1]
         x = init_x
         with torch.no_grad():
-            for time_step in range(time_steps):
+            for time_step in time_steps:
                 batch_time_step = (
                     torch.ones(self.batch_size, device=device) * time_step
                 )
-                g = self._diffusion_coeff(batch_time_step)
+                g = self._diffusion_coeff(batch_time_step, self.sigma)
                 # TODO cehck the self.model
                 mean_x = (
                     x
