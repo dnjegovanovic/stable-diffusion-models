@@ -14,5 +14,5 @@ def main(config):
                          max_epochs=config.model_UnetSP.UnetSP['num_epochs'],
                          log_every_n_steps=10)
     
-    model = SimpleUNetModules(config.model_UnetSP)
+    model = SimpleUNetModules(**vars(config.model_UnetSP))
     trainer.fit(model)

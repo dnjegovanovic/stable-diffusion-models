@@ -17,18 +17,21 @@ from SDM_Pipeline_MNIST.models.SimpleUNetSC import *
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class SimpleUNetModules(pl.LightningModule):
-    def __init__(self,config, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__()
+        self.__dict__.update(kwargs)
         
-        self.batch_size = config.UnetSP['batch_size']
-        self.num_epochs = config.UnetSP['num_epochs']
-        self.sigma = config.UnetSP['sigma']
-        self.euler_maruyam_num_steps = config.UnetSP['euler_maruyam_num_steps']
-        self.eps_stab = config.UnetSP['eps_stab']
-        self.lr = config.UnetSP['lr']
-        self.use_unet_score_based = config.UnetSP['use_unet_score_based']
+        self.batch_size = self.UnetSP['batch_size']
+        self.num_epochs = self.UnetSP['num_epochs']
+        self.sigma = self.UnetSP['sigma']
+        self.euler_maruyam_num_steps = self.UnetSP['euler_maruyam_num_steps']
+        self.eps_stab = self.UnetSP['eps_stab']
+        self.lr = self.UnetSP['lr']
+        self.use_unet_score_based = self.UnetSP['use_unet_score_based']
         self._setup_arch()
         self._setup_data()
+        
+        self.save_hyperparameters()
 
     def _setup_arch(self):
         self.marg_prob_fun = functools.partial(self._marginal_prob_std,sigma=self.sigma)
@@ -198,3 +201,5 @@ class SimpleUNetModules(pl.LightningModule):
             persistent_workers=True,
             timeout=30
         )
+
+        

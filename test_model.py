@@ -7,12 +7,14 @@ from SDM_Pipeline_MNIST.modules.SimpleUnetModules import *
 
 import matplotlib.pyplot as plt
 from torchvision.utils import make_grid
+from SDM_Pipeline_MNIST.config.core import config
 
 
 @torch.no_grad()
 def main(args):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    module = SimpleUNetModules.load_from_checkpoint(args.model)
+    model= SimpleUNetModules(**vars(config.model_UnetSP))
+    module = model.load_from_checkpoint(args.model)
     module.to(device)
     module.eval()
     sample_num = 64
