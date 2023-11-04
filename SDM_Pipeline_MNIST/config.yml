@@ -1,0 +1,11 @@
+package_name: SDM_Pipeline_MNIST
+save_file: "./simple_unet_test"
+
+UnetSP:
+  batch_size : 1024
+  num_epochs : 100
+  sigma : 25.0
+  euler_maruyam_num_steps : 500
+  eps_stab : 0.00001
+  lr : 0.001
+  use_unet_score_based : True

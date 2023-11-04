@@ -17,16 +17,16 @@ from SDM_Pipeline_MNIST.models.SimpleUNetSC import *
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class SimpleUNetModules(pl.LightningModule):
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self,config, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         
-        self.batch_size = 1024
-        self.num_epochs = 100
-        self.sigma = 25.0
-        self.euler_maruyam_num_steps = 500
-        self.eps_stab = 1e-5
-        self.lr = 10e-4
-        self.use_unet_score_based = True
+        self.batch_size = config.UnetSP['batch_size']
+        self.num_epochs = config.UnetSP['num_epochs']
+        self.sigma = config.UnetSP['sigma']
+        self.euler_maruyam_num_steps = config.UnetSP['euler_maruyam_num_steps']
+        self.eps_stab = config.UnetSP['eps_stab']
+        self.lr = config.UnetSP['lr']
+        self.use_unet_score_based = config.UnetSP['use_unet_score_based']
         self._setup_arch()
         self._setup_data()
 
@@ -133,7 +133,6 @@ class SimpleUNetModules(pl.LightningModule):
                     torch.ones(self.batch_size, device=device) * time_step
                 )
                 g = self._diffusion_coeff(batch_time_step, self.sigma)
-                # TODO cehck the self.model
                 mean_x = (
                     x
                     + (g**2)[:, None, None, None]
