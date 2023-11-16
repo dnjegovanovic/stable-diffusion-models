@@ -28,7 +28,11 @@ def image_to_image_test(print_model_shape=True):
     model_path = "CompVis/stable-diffusion-v1-4"
 
     pipe = StableDiffusionImg2ImgPipeline.from_pretrained(
-        model_path, revision="fp16", torch_dtype=torch.float16, use_auth_token=True
+        model_path,
+        revision="fp16",
+        torch_dtype=torch.float16,
+        use_auth_token=True,
+        cache_dir="D:/ML_AI_DL_Projects/projects_repo/stable-diffusion-models/pretrained_model",
     )
     pipe = pipe.to(device)
 
@@ -67,6 +71,7 @@ def create_pipe():
         use_auth_token=True,
         revision="fp16",
         torch_dtype=torch.float16,
+        cache_dir="D:/ML_AI_DL_Projects/projects_repo/stable-diffusion-models/pretrained_model",
     ).to("cuda")
 
     # Disable the safety checkers

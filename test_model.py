@@ -18,18 +18,17 @@ def main(args):
     sample_num = 64
     module.batch_size = sample_num
     samples = module._euler_maruyam_sampler()
-    
+
     samples = samples.clamp(0.0, 1.0)
     sample_grid = make_grid(samples, nrow=int(np.sqrt(sample_num)))
 
-    plt.figure(figsize=(6,6))
-    plt.axis('off')
-    plt.imshow(sample_grid.permute(1, 2, 0).cpu(), vmin=0., vmax=1.)
+    plt.figure(figsize=(6, 6))
+    plt.axis("off")
+    plt.imshow(sample_grid.permute(1, 2, 0).cpu(), vmin=0.0, vmax=1.0)
     plt.savefig("./playground_imgs/SDM_Pipeline_MNIST_imgs/samples_scorebased_Unet.png")
-    
+
 
 if __name__ == "__main__":
     parser = ArgumentParser(add_help=True)
-    parser.add_argument("--model", required=True,
-                        help="model to evaluate")
+    parser.add_argument("--model", required=True, help="model to evaluate")
     main(parser.parse_args())

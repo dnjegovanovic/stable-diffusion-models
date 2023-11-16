@@ -128,7 +128,7 @@ class SimpleUNetSP(nn.Module):
 
         h += self.ro_dense_6(embed)
         h = self.act_fun(self.trans_gnorm_3(h))
-        h = self.trans_conv_2(h+ h2)
+        h = self.trans_conv_2(h + h2)
 
         h += self.ro_dense_7(embed)
         h = self.act_fun(self.trans_gnorm_2(h))

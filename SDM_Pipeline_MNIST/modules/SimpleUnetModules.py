@@ -14,27 +14,31 @@ from torch.optim.lr_scheduler import MultiplicativeLR, LambdaLR
 
 from SDM_Pipeline_MNIST.models.SimpleUNet import *
 from SDM_Pipeline_MNIST.models.SimpleUNetSC import *
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 
 class SimpleUNetModules(pl.LightningModule):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__()
         self.__dict__.update(kwargs)
-        
-        self.batch_size = self.UnetSP['batch_size']
-        self.num_epochs = self.UnetSP['num_epochs']
-        self.sigma = self.UnetSP['sigma']
-        self.euler_maruyam_num_steps = self.UnetSP['euler_maruyam_num_steps']
-        self.eps_stab = self.UnetSP['eps_stab']
-        self.lr = self.UnetSP['lr']
-        self.use_unet_score_based = self.UnetSP['use_unet_score_based']
+
+        self.batch_size = self.UnetSP["batch_size"]
+        self.num_epochs = self.UnetSP["num_epochs"]
+        self.sigma = self.UnetSP["sigma"]
+        self.euler_maruyam_num_steps = self.UnetSP["euler_maruyam_num_steps"]
+        self.eps_stab = self.UnetSP["eps_stab"]
+        self.lr = self.UnetSP["lr"]
+        self.use_unet_score_based = self.UnetSP["use_unet_score_based"]
         self._setup_arch()
         self._setup_data()
-        
+
         self.save_hyperparameters()
 
     def _setup_arch(self):
-        self.marg_prob_fun = functools.partial(self._marginal_prob_std,sigma=self.sigma)
+        self.marg_prob_fun = functools.partial(
+            self._marginal_prob_std, sigma=self.sigma
+        )
         if self.use_unet_score_based:
             self.model = SimpleUNetSP(self.marg_prob_fun)
         else:
@@ -43,18 +47,17 @@ class SimpleUNetModules(pl.LightningModule):
         self.model_params = list(self.model.parameters())
 
     def _setup_data(self):
-        dataset = MNIST(
-            ".", train=True, transform=transforms.ToTensor(), download=True
-        )
+        dataset = MNIST(".", train=True, transform=transforms.ToTensor(), download=True)
         # use 20% of training data for validation
         train_set_size = int(len(dataset) * 0.95)
         valid_set_size = len(dataset) - train_set_size
 
         # split the train set into two
         seed = torch.Generator().manual_seed(42)
-        self.train_dataset, self.val_dataset = data.random_split(dataset, [train_set_size, valid_set_size], generator=seed)
+        self.train_dataset, self.val_dataset = data.random_split(
+            dataset, [train_set_size, valid_set_size], generator=seed
+        )
 
-        
     def _marginal_prob_std(self, time_step, sigma) -> torch.Tensor:
         """Compute the mean and standard deviation of p_{0t}(x(t) | x(0)).
             A function that gives the standard deviation of the perturbation kernel
@@ -123,7 +126,7 @@ class SimpleUNetModules(pl.LightningModule):
         t = torch.ones(self.batch_size, device=device)
         init_x = (
             torch.randn(self.batch_size, *x_shape, device=device)
-            * self._marginal_prob_std(t,self.sigma)[:, None, None, None]
+            * self._marginal_prob_std(t, self.sigma)[:, None, None, None]
         )
         time_steps = torch.linspace(
             1.0, eps, self.euler_maruyam_num_steps, device=device
@@ -132,9 +135,7 @@ class SimpleUNetModules(pl.LightningModule):
         x = init_x
         with torch.no_grad():
             for time_step in time_steps:
-                batch_time_step = (
-                    torch.ones(self.batch_size, device=device) * time_step
-                )
+                batch_time_step = torch.ones(self.batch_size, device=device) * time_step
                 g = self._diffusion_coeff(batch_time_step, self.sigma)
                 mean_x = (
                     x
@@ -150,34 +151,34 @@ class SimpleUNetModules(pl.LightningModule):
 
     def forward(self, x):
         # Sample time uniformly in 0, 1
-        random_t = torch.rand(x.shape[0], device=x.device) * (1. - self.eps_stab) + self.eps_stab 
+        random_t = (
+            torch.rand(x.shape[0], device=x.device) * (1.0 - self.eps_stab)
+            + self.eps_stab
+        )
         # Find the noise std at the time `t`
-        std = self._marginal_prob_std(random_t,sigma=self.sigma)
+        std = self._marginal_prob_std(random_t, sigma=self.sigma)
         ####### YOUR CODE HERE  (2 lines)
-        z = torch.randn_like(x)             # get normally distributed noise
-        perturbed_x = x + std[:,None,None,None]*z
+        z = torch.randn_like(x)  # get normally distributed noise
+        perturbed_x = x + std[:, None, None, None] * z
         score = self.model(perturbed_x, random_t)
-        
+
         return score
 
     def training_step(self, sample, batch_idx):
-        loss =self._loss_fn(sample[0])
-        self.log('train_loss', loss.item(),prog_bar=True)
+        loss = self._loss_fn(sample[0])
+        self.log("train_loss", loss.item(), prog_bar=True)
         return loss
 
     def validation_step(self, sample, batch_idx):
-        val_loss =self._loss_fn(sample[0])
-        self.log('val_loss', val_loss.item(),prog_bar=True)
+        val_loss = self._loss_fn(sample[0])
+        self.log("val_loss", val_loss.item(), prog_bar=True)
         return val_loss
 
     def configure_optimizers(self):
-        opt_model = Adam(
-            [{
-                "params": self.model_params
-            }],
-            lr=self.lr
+        opt_model = Adam([{"params": self.model_params}], lr=self.lr)
+        scheduler = LambdaLR(
+            opt_model, lr_lambda=lambda epoch: max(0.2, 0.98**self.num_epochs)
         )
-        scheduler = LambdaLR(opt_model, lr_lambda=lambda epoch: max(0.2, 0.98 ** self.num_epochs))
         return [opt_model], {"scheduler": scheduler}
 
     def train_dataloader(self):
@@ -188,7 +189,7 @@ class SimpleUNetModules(pl.LightningModule):
             num_workers=4,
             pin_memory=True,
             persistent_workers=True,
-            timeout=30
+            timeout=30,
         )
 
     def val_dataloader(self):
@@ -199,7 +200,5 @@ class SimpleUNetModules(pl.LightningModule):
             num_workers=4,
             pin_memory=True,
             persistent_workers=True,
-            timeout=30
+            timeout=30,
         )
-
-        

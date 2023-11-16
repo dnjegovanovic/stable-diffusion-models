@@ -17,7 +17,11 @@ def generate_image(prompt):
     device = "cuda"
     model_path = "CompVis/stable-diffusion-v1-4"
 
-    pipe = StableDiffusionPipeline.from_pretrained(model_path, use_auth_token=True)
+    pipe = StableDiffusionPipeline.from_pretrained(
+        model_path,
+        use_auth_token=True,
+        cache_dir="D:/ML_AI_DL_Projects/projects_repo/stable-diffusion-models/pretrained_model",
+    )
     pipe = pipe.to(device)
 
     myunet = UNetStableDiffusion()

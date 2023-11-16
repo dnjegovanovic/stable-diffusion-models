@@ -9,6 +9,7 @@ __pycache__/
 # Distribution / packaging
 .Python
 mlfssdm/
+pretrained_model/
 build/
 develop-eggs/
 dist/

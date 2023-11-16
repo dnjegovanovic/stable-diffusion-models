@@ -6,6 +6,7 @@ from SDM_UNet.scripts.run_main import *
 import SDM_Pipeline_MNIST.scripts.test_train_simpleUNet as sunet
 from SDM_Pipeline_MNIST.config.core import config
 
+
 def main(args):
     if args.test_playground:
         pg.main(args)
@@ -19,9 +20,11 @@ if __name__ == "__main__":
     parser = ArgumentParser(add_help=True)
     parser.add_argument("--test-playground", action="store_true", help="Simple test")
     parser.add_argument("--test-custom-unet", action="store_true", help="Simple test")
-    parser.add_argument("--test-minst-unet", action="store_true", help="test-minst-unet")
+    parser.add_argument(
+        "--test-minst-unet", action="store_true", help="test-minst-unet"
+    )
     # ---------------------------------------------------------------------
-    playground_parser = parser.add_argument_group("Playground arguments") 
+    playground_parser = parser.add_argument_group("Playground arguments")
     playground_parser.add_argument(
         "--simple-gen", action="store_true", help="Simple test"
     )
