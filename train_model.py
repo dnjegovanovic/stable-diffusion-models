@@ -4,16 +4,19 @@ import playground.stable_diffusiuon_playground as pg
 
 from SDM_UNet.scripts.run_main import *
 import SDM_Pipeline_MNIST.scripts.test_train_simpleUNet as sunet
+import SDM_Pipeline_MNIST.scripts.test_train_UNetTransformer as unettr
 from SDM_Pipeline_MNIST.config.core import config
 
 
 def main(args):
     if args.test_playground:
         pg.main(args)
-    if args.test_custom_unet:
+    elif args.test_custom_unet:
         generate_image(args.prompt)
-    if args.test_minst_unet:
+    elif args.test_minst_unet:
         sunet.main(config)
+    elif args.test_minst_unettr:
+        unettr.main(config)
 
 
 if __name__ == "__main__":
@@ -22,6 +25,9 @@ if __name__ == "__main__":
     parser.add_argument("--test-custom-unet", action="store_true", help="Simple test")
     parser.add_argument(
         "--test-minst-unet", action="store_true", help="test-minst-unet"
+    )
+    parser.add_argument(
+        "--test-minst-unettr", action="store_true", help="test unet transformer model"
     )
     # ---------------------------------------------------------------------
     playground_parser = parser.add_argument_group("Playground arguments")

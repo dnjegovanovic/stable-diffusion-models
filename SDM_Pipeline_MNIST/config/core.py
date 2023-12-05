@@ -19,12 +19,14 @@ class AppConfig(BaseModel):
 
 class SDMPipelineMNIST(BaseModel):
     UnetSP: Dict
+    UnetTR: Dict
 
 
 class Config(BaseModel):
     """Master config object."""
 
     model_UnetSP: SDMPipelineMNIST
+    model_UnetTR: SDMPipelineMNIST
     app_config: AppConfig
 
 
@@ -67,12 +69,23 @@ def create_and_validate_config(parsed_config: YAML = None) -> Config:
                 parsed_config[k]["use_unet_score_based"] = bool(
                     parsed_config[k]["use_unet_score_based"]
                 )
+            elif k == "UnetTR":
+                parsed_config[k]["batch_size"] = int(parsed_config[k]["batch_size"])
+                parsed_config[k]["num_epochs"] = int(parsed_config[k]["num_epochs"])
+                parsed_config[k]["sigma"] = float(parsed_config[k]["sigma"])
+                parsed_config[k]["euler_maruyam_num_steps"] = int(
+                    parsed_config[k]["euler_maruyam_num_steps"]
+                )
+                parsed_config[k]["eps_stab"] = float(parsed_config[k]["eps_stab"])
+                parsed_config[k]["lr"] = float(parsed_config[k]["lr"])
+
             else:
                 Exception("No configuration in config file.")
 
     _config = Config(
         app_config=AppConfig(**parsed_config),
         model_UnetSP=SDMPipelineMNIST(**parsed_config),
+        model_UnetTR=SDMPipelineMNIST(**parsed_config),
     )
 
     return _config

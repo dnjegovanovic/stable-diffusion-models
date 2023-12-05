@@ -157,7 +157,6 @@ class SimpleUNetModules(pl.LightningModule):
         )
         # Find the noise std at the time `t`
         std = self._marginal_prob_std(random_t, sigma=self.sigma)
-        ####### YOUR CODE HERE  (2 lines)
         z = torch.randn_like(x)  # get normally distributed noise
         perturbed_x = x + std[:, None, None, None] * z
         score = self.model(perturbed_x, random_t)

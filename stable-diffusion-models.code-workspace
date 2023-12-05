@@ -1,0 +1,9 @@
+{
+	"folders": [
+		{
+			"name": "stable-diffusion-models",
+			"path": "."
+		}
+	],
+	"settings": {}
+}
