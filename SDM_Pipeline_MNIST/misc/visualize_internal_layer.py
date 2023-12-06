@@ -2,13 +2,14 @@ import torch
 import matplotlib.pyplot as plt
 
 
-def visualize_digit_embedding(digit_embed):
+def visualize_digit_embedding(digit_embed, save_path):
     cossim_mat = []
     for i in range(10):
         cossim = torch.cosine_similarity(digit_embed, digit_embed[i : i + 1, :]).cpu()
         cossim_mat.append(cossim)
     cossim_mat = torch.stack(cossim_mat)
     cossim_mat_nodiag = cossim_mat + torch.diag_embed(torch.nan * torch.ones(10))
+
     plt.imshow(cossim_mat_nodiag)
-    plt.show()
+    plt.savefig(save_path / "sond_embeded_weights.png")
     return cossim_mat
