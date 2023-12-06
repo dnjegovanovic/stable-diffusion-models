@@ -93,7 +93,9 @@ class UNetTransformer(pl.LightningModule):
         """
 
         # Sample time uniformly from 0 to 1
-        random_t = torch.rand(sample[0].shape[0], device=sample[0].device) * (1.0 - eps) + eps
+        random_t = (
+            torch.rand(sample[0].shape[0], device=sample[0].device) * (1.0 - eps) + eps
+        )
         # Fine the noise std at the time t
         std = self._marginal_prob_std(random_t, self.sigma)
         z = torch.randn_like(sample[0])  # get normally distributed noise

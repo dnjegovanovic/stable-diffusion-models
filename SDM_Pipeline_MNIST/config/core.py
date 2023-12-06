@@ -21,8 +21,10 @@ class SDMPipelineMNIST(BaseModel):
     UnetSP: Dict
     UnetTR: Dict
 
+
 class SDMTransformer(BaseModel):
     UnetTR: Dict
+
 
 class Config(BaseModel):
     """Master config object."""
