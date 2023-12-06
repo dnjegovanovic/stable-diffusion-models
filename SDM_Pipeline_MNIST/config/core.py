@@ -21,12 +21,14 @@ class SDMPipelineMNIST(BaseModel):
     UnetSP: Dict
     UnetTR: Dict
 
+class SDMTransformer(BaseModel):
+    UnetTR: Dict
 
 class Config(BaseModel):
     """Master config object."""
 
     model_UnetSP: SDMPipelineMNIST
-    model_UnetTR: SDMPipelineMNIST
+    model_UnetTR: SDMTransformer
     app_config: AppConfig
 
 
@@ -85,7 +87,7 @@ def create_and_validate_config(parsed_config: YAML = None) -> Config:
     _config = Config(
         app_config=AppConfig(**parsed_config),
         model_UnetSP=SDMPipelineMNIST(**parsed_config),
-        model_UnetTR=SDMPipelineMNIST(**parsed_config),
+        model_UnetTR=SDMTransformer(**parsed_config),
     )
 
     return _config

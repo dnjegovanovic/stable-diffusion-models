@@ -13,7 +13,7 @@ from torch.optim.lr_scheduler import LambdaLR
 import numpy as np
 import functools
 
-from SDM_Pipeline_MNIST.modules.UnetTransformer import *
+from SDM_Pipeline_MNIST.models.UnetTransformerModel import *
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -38,7 +38,7 @@ class UNetTransformer(pl.LightningModule):
             self._marginal_prob_std, sigma=self.sigma
         )
 
-        self.model = UNetTransformer(self.marg_prob_fun)
+        self.model = UnetTransformerModel(self.marg_prob_fun)
         self.model.to(device)
         self.model_params = list(self.model.parameters())
 
@@ -93,13 +93,13 @@ class UNetTransformer(pl.LightningModule):
         """
 
         # Sample time uniformly from 0 to 1
-        random_t = torch.rand(sample.shape[0], device=sample.device) * (1.0 - eps) + eps
+        random_t = torch.rand(sample[0].shape[0], device=sample[0].device) * (1.0 - eps) + eps
         # Fine the noise std at the time t
         std = self._marginal_prob_std(random_t, self.sigma)
-        z = torch.randn_like(sample)  # get normally distributed noise
-        perturbed_x = sample + std[:, None, None, None] * z
+        z = torch.randn_like(sample[0])  # get normally distributed noise
+        perturbed_x = sample[0] + std[:, None, None, None] * z
 
-        score = self.model(perturbed_x, random_t)
+        score = self.model(perturbed_x, random_t, sample[1])
         loss = torch.mean(
             torch.sum((score * std[:, None, None, None] + z) ** 2, dim=(1, 2, 3))
         )
@@ -148,24 +148,24 @@ class UNetTransformer(pl.LightningModule):
     def forward(self, x):
         # Sample time uniformly in 0, 1
         random_t = (
-            torch.rand(x.shape[0], device=x.device) * (1.0 - self.eps_stab)
+            torch.rand(x[0].shape[0], device=x.device) * (1.0 - self.eps_stab)
             + self.eps_stab
         )
         # Find the noise std at the time `t`
         std = self._marginal_prob_std(random_t, sigma=self.sigma)
-        z = torch.randn_like(x)  # get normally distributed noise
-        perturbed_x = x + std[:, None, None, None] * z
-        score = self.model(perturbed_x, random_t)
+        z = torch.randn_like(x[0])  # get normally distributed noise
+        perturbed_x = x[0] + std[:, None, None, None] * z
+        score = self.model(perturbed_x, random_t, x[1])
 
         return score
 
     def training_step(self, sample, batch_idx):
-        loss = self._loss_fn(sample[0])
+        loss = self._loss_fn(sample)
         self.log("train_loss", loss.item(), prog_bar=True)
         return loss
 
     def validation_step(self, sample, batch_idx):
-        val_loss = self._loss_fn(sample[0])
+        val_loss = self._loss_fn(sample)
         self.log("val_loss", val_loss.item(), prog_bar=True)
         return val_loss
 

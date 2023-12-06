@@ -16,9 +16,10 @@
                 //"--image-to-image",
                 //"--test-custom-unet",
                 //"--test-minst-unet",
-                "--test-minst-unettr",
-                //"--model",
-                //"D:/ML_AI_DL_Projects/projects_repo/stable-diffusion-models/simple_unet_test/test_UnetSB/version_1/checkpoints/epoch=99-step=5600-v2.ckpt"
+                //"--test-minst-unettr",
+                "--model",
+                "/d/ML_AI_DL_Projects/projects_repo/stable-diffusion-models/simple_unet_test/test_UnetTR/version_1/checkpoints/epoch=149-step=8400.ckpt",
+                "--test-unettransforme"
             ],
         }
     ]

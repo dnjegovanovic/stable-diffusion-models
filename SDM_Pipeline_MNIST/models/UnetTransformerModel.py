@@ -82,7 +82,7 @@ class UnetTransformerModel(nn.Module):
 
     def forward(self, x: torch.Tensor, time_feature: torch.Tensor, y=None):
         # Obtain the Gaussian random feature embedding for t
-        embed = self.act(self.time_embed(time_feature))
+        embed = self.act(self.time_embeded(time_feature))
         y_embed = self.cond_embed(y).unsqueeze(1)
         # Encoding path
         h1 = self.conv_1(x) + self.dense_1(embed)
