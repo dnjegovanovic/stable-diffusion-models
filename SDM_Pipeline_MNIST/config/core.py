@@ -26,11 +26,16 @@ class SDMTransformer(BaseModel):
     UnetTR: Dict
 
 
+class AutoEncoder(BaseModel):
+    AE: Dict
+
+
 class Config(BaseModel):
     """Master config object."""
 
     model_UnetSP: SDMPipelineMNIST
     model_UnetTR: SDMTransformer
+    model_AE: AutoEncoder
     app_config: AppConfig
 
 
@@ -82,7 +87,10 @@ def create_and_validate_config(parsed_config: YAML = None) -> Config:
                 )
                 parsed_config[k]["eps_stab"] = float(parsed_config[k]["eps_stab"])
                 parsed_config[k]["lr"] = float(parsed_config[k]["lr"])
-
+            elif k == "AE":
+                parsed_config[k]["batch_size"] = int(parsed_config[k]["batch_size"])
+                parsed_config[k]["num_epochs"] = int(parsed_config[k]["num_epochs"])
+                parsed_config[k]["lr"] = float(parsed_config[k]["lr"])
             else:
                 Exception("No configuration in config file.")
 
@@ -90,6 +98,7 @@ def create_and_validate_config(parsed_config: YAML = None) -> Config:
         app_config=AppConfig(**parsed_config),
         model_UnetSP=SDMPipelineMNIST(**parsed_config),
         model_UnetTR=SDMTransformer(**parsed_config),
+        model_AE=AutoEncoder(**parsed_config),
     )
 
     return _config

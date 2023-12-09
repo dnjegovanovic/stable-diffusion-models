@@ -5,6 +5,7 @@ import playground.stable_diffusiuon_playground as pg
 from SDM_UNet.scripts.run_main import *
 import SDM_Pipeline_MNIST.scripts.test_train_simpleUNet as sunet
 import SDM_Pipeline_MNIST.scripts.test_train_UNetTransformer as unettr
+import SDM_Pipeline_MNIST.scripts.test_train_AutoEncoder as autoencoder
 from SDM_Pipeline_MNIST.config.core import config
 
 
@@ -17,6 +18,8 @@ def main(args):
         sunet.main(config)
     elif args.test_minst_unettr:
         unettr.main(config)
+    elif args.test_autoencoder:
+        autoencoder.main(config)
 
 
 if __name__ == "__main__":
@@ -28,6 +31,9 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--test-minst-unettr", action="store_true", help="test unet transformer model"
+    )
+    parser.add_argument(
+        "--test-autoencoder", action="store_true", help="test autoencoder model"
     )
     # ---------------------------------------------------------------------
     playground_parser = parser.add_argument_group("Playground arguments")

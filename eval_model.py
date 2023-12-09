@@ -6,7 +6,7 @@ from pathlib import Path
 
 from argparse import ArgumentParser
 from SDM_Pipeline_MNIST.modules.SimpleUnetModules import *
-from SDM_Pipeline_MNIST.modules.UnetTransformer import *
+from SDM_Pipeline_MNIST.modules.UnetTransformerModules import *
 from SDM_Pipeline_MNIST.misc.visualize_internal_layer import visualize_digit_embedding
 
 import matplotlib.pyplot as plt
@@ -14,7 +14,9 @@ from torchvision.utils import make_grid
 
 
 def test_simple_Unet(args):
-    save_path = Path("D:/ML_AI_DL_Projects/projects_repo/stable-diffusion-models/playground_imgs/SDM_Pipeline_MNIST_imgs")
+    save_path = Path(
+        "D:/ML_AI_DL_Projects/projects_repo/stable-diffusion-models/playground_imgs/SDM_Pipeline_MNIST_imgs"
+    )
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     module = SimpleUNetModules.load_from_checkpoint(args.model)
     module.to(device)
@@ -30,10 +32,12 @@ def test_simple_Unet(args):
     plt.axis("off")
     plt.imshow(sample_grid.permute(1, 2, 0).cpu(), vmin=0.0, vmax=1.0)
     plt.savefig(save_path / "samples_scorebased_Unet.png")
-    
+
 
 def test_UnetTransformer(args):
-    save_path = Path("D:/ML_AI_DL_Projects/projects_repo/stable-diffusion-models/playground_imgs/SDM_Pipeline_MNIST_imgs")
+    save_path = Path(
+        "D:/ML_AI_DL_Projects/projects_repo/stable-diffusion-models/playground_imgs/SDM_Pipeline_MNIST_imgs"
+    )
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     module = UNetTransformer.load_from_checkpoint(args.model)
     module.to(device)
@@ -51,7 +55,7 @@ def test_UnetTransformer(args):
     plt.axis("off")
     plt.imshow(sample_grid.permute(1, 2, 0).cpu(), vmin=0.0, vmax=1.0)
     plt.savefig(save_path / "samples_scorebased_Unet.png")
-    
+
     visualize_digit_embedding(module.model.cond_embed.weight.data, save_path)
 
 
