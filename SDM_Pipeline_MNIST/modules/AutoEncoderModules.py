@@ -3,6 +3,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 import torch.utils.data as data
 from torch.optim import Adam
+from torch.utils.data import TensorDataset
 
 import pytorch_lightning as pl
 
@@ -56,6 +57,24 @@ class AutoEncoderModule(pl.LightningModule):
 
         return mse + lp
 
+    def create_latent_sapce(self, batch_size):
+        full_dataset = data.ConcatDataset([self.train_dataset, self. val_dataset])
+        data_loader = DataLoader(full_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
+        self.model.requires_grad_(False)
+        self.model.eval()
+        
+        zs = []
+        ys = []
+        for x, y in data_loader:
+            z = self.model.encoder(x.to(device)).cpu()
+            zs.append(z)
+            ys.append(y)
+
+        zdata = torch.cat(zs, )
+        ydata = torch.cat(ys, )
+        
+        return TensorDataset(zdata, ydata)
+    
     def forward(self, x):
         e = self.model(x)
 
@@ -86,7 +105,7 @@ class AutoEncoderModule(pl.LightningModule):
         return opt_model
 
     def train_dataloader(self):
-        dataloader = DataLoader(
+        train_dataloader = DataLoader(
             self.train_dataset,
             batch_size=self.batch_size,
             shuffle=True,
@@ -96,10 +115,10 @@ class AutoEncoderModule(pl.LightningModule):
             timeout=30,
         )
 
-        return dataloader
+        return train_dataloader
 
     def val_dataloader(self):
-        dataloader = DataLoader(
+        val_dataloader = DataLoader(
             self.val_dataset,
             batch_size=self.batch_size,
             shuffle=False,
@@ -109,4 +128,4 @@ class AutoEncoderModule(pl.LightningModule):
             timeout=30,
         )
 
-        return dataloader
+        return val_dataloader
