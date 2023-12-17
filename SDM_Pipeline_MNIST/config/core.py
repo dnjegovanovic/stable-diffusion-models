@@ -87,6 +87,8 @@ def create_and_validate_config(parsed_config: YAML = None) -> Config:
                 )
                 parsed_config[k]["eps_stab"] = float(parsed_config[k]["eps_stab"])
                 parsed_config[k]["lr"] = float(parsed_config[k]["lr"])
+                parsed_config[k]["use_latent_unet"] = bool(parsed_config[k]["use_latent_unet"])
+                parsed_config[k]["autoencoder_model"] = str(parsed_config[k]["autoencoder_model"])
             elif k == "AE":
                 parsed_config[k]["batch_size"] = int(parsed_config[k]["batch_size"])
                 parsed_config[k]["num_epochs"] = int(parsed_config[k]["num_epochs"])

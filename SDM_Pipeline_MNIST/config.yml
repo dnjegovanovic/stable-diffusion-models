@@ -17,6 +17,8 @@ UnetTR:
   euler_maruyam_num_steps : 250
   eps_stab : 0.00001
   lr : 0.001
+  autoencoder_model : "D:/ML_AI_DL_Projects/projects_repo/stable-diffusion-models/simple_unet_test/test_AE/version_1/checkpoints/epoch=49-step=1400.ckpt"
+  use_latent_unet: True
 
 AE:
   batch_size : 2048

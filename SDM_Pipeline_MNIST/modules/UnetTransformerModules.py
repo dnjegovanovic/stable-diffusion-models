@@ -14,6 +14,8 @@ import numpy as np
 import functools
 
 from SDM_Pipeline_MNIST.models.UnetTransformerModel import *
+from SDM_Pipeline_MNIST.models.LatentUNetTransformer import *
+from SDM_Pipeline_MNIST.modules.AutoEncoderModules import *
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -28,6 +30,8 @@ class UNetTransformer(pl.LightningModule):
         self.euler_maruyam_num_steps = self.UnetTR["euler_maruyam_num_steps"]
         self.eps_stab = self.UnetTR["eps_stab"]
         self.lr = self.UnetTR["lr"]
+        self.use_latent_unet = self.UnetTR["use_latent_unet"]
+        self.autoencoder_model = self.UnetTR["autoencoder_model"]
 
         self._setup_arch()
         self._setup_data()
@@ -37,22 +41,37 @@ class UNetTransformer(pl.LightningModule):
         self.marg_prob_fun = functools.partial(
             self._marginal_prob_std, sigma=self.sigma
         )
-
-        self.model = UnetTransformerModel(self.marg_prob_fun)
+        
+        if self.use_latent_unet:
+            self.model = LatentUnetTransformerModel(self.marg_prob_fun, channels=[4,16,32,64])
+            self.autoencoder_model = AutoEncoderModule.load_from_checkpoint(self.autoencoder_model)
+            self.autoencoder_model.to(device)
+            self.autoencoder_model.eval()
+        else:
+            self.model = UnetTransformerModel(self.marg_prob_fun)
+            
         self.model.to(device)
         self.model_params = list(self.model.parameters())
+            
 
     def _setup_data(self):
-        dataset = MNIST(".", train=True, transform=transfroms.ToTensor(), download=True)
+
+        if self.use_latent_unet:
+            dataset = self.autoencoder_model.create_latent_sapce(self.batch_size)
+        else:
+            dataset = MNIST(".", train=True, transform=transfroms.ToTensor(), download=True)
+            
         # use 20% of training data for validation
         train_set_size = int(len(dataset) * 0.95)
         valid_set_size = len(dataset) - train_set_size
-
+        
         # split the train set into two
         seed = torch.Generator().manual_seed(42)
         self.train_dataset, self.val_dataset = data.random_split(
             dataset, [train_set_size, valid_set_size], generator=seed
         )
+
+        
 
     def _marginal_prob_std(self, time_step, sigma) -> torch.Tensor:
         """Compute the mean and standard deviation of p_{0t}(x(t) | x(0)).
@@ -199,3 +218,19 @@ class UNetTransformer(pl.LightningModule):
             persistent_workers=True,
             timeout=30,
         )
+        
+    # @staticmethod
+    # def add_model_specific_args(parent_parser):
+    #     parser = parent_parser.add_argument_group("Transformer Model")
+
+    #     parser.add_argument(
+    #         "--use-latent-unet",
+    #         action="store_true",
+    #         help="use latent unet model",
+    #     )
+
+    #     parser.add_argument(
+    #         "--autoencoder-model",
+    #         action="store_true",
+    #         help="use base mesh, disables all blend shapes",
+    #     )
