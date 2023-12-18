@@ -64,7 +64,11 @@ class LatentUnetTransformerModel(nn.Module):
         # self.tgnorm_4 = nn.GroupNorm(32, num_channels=channels[2])
 
         self.tconv_3 = nn.ConvTranspose2d(
-            channels[3], channels[2], 3, stride=2, bias=False,
+            channels[3],
+            channels[2],
+            3,
+            stride=2,
+            bias=False,
         )  #  + channels[2]
         self.dense_6 = RODense(embed_dim, channels[2])
         self.tgnorm_3 = nn.GroupNorm(4, num_channels=channels[2])
@@ -75,7 +79,9 @@ class LatentUnetTransformerModel(nn.Module):
         )  #  + channels[1]
         self.dense_7 = RODense(embed_dim, channels[1])
         self.tgnorm_2 = nn.GroupNorm(4, num_channels=channels[1])
-        self.tconv_1 = nn.ConvTranspose2d(channels[1], channels[0], 3, stride=1)  #  + channels[0]
+        self.tconv_1 = nn.ConvTranspose2d(
+            channels[1], channels[0], 3, stride=1
+        )  #  + channels[0]
 
         # The swish activation function
         self.act = nn.SiLU()  # lambda x: x * torch.sigmoid(x)
@@ -93,12 +99,12 @@ class LatentUnetTransformerModel(nn.Module):
         h1 = self.act(self.gnorm_1(h1))
         h2 = self.conv_2(h1) + self.dense_2(embed)
         h2 = self.act(self.gnorm_2(h2))
-        
+
         h2 = self.attn_2(h2, y_embed)
         h3 = self.conv_3(h2) + self.dense_3(embed)
         h3 = self.act(self.gnorm_3(h3))
         h3 = self.attn_3(h3, y_embed)
-        
+
         # h4 = self.conv_4(h3) + self.dense_4(embed)
         # h4 = self.act(self.gnorm_4(h4))
         # h4 = self.attn_4(h4, y_embed)

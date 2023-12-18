@@ -2,7 +2,7 @@ import torch
 import matplotlib.pyplot as plt
 
 
-def visualize_digit_embedding(digit_embed, save_path, name='base'):
+def visualize_digit_embedding(digit_embed, save_path, name="base"):
     cossim_mat = []
     for i in range(10):
         cossim = torch.cosine_similarity(digit_embed, digit_embed[i : i + 1, :]).cpu()

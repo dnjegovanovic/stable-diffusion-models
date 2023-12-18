@@ -58,11 +58,13 @@ class AutoEncoderModule(pl.LightningModule):
         return mse + lp
 
     def create_latent_sapce(self, batch_size, save_data=False):
-        full_dataset = data.ConcatDataset([self.train_dataset, self. val_dataset])
-        data_loader = DataLoader(full_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
+        full_dataset = data.ConcatDataset([self.train_dataset, self.val_dataset])
+        data_loader = DataLoader(
+            full_dataset, batch_size=batch_size, shuffle=False, num_workers=4
+        )
         self.model.requires_grad_(False)
         self.model.eval()
-        
+
         zs = []
         ys = []
         for x, y in data_loader:
@@ -70,15 +72,19 @@ class AutoEncoderModule(pl.LightningModule):
             zs.append(z)
             ys.append(y)
 
-        zdata = torch.cat(zs, )
-        ydata = torch.cat(ys, )
-        
+        zdata = torch.cat(
+            zs,
+        )
+        ydata = torch.cat(
+            ys,
+        )
+
         if save_data:
-            datas = TensorDataset(zdata, ydata) 
-            torch.save(datas, './autoencoded_data.pt')
-        
+            datas = TensorDataset(zdata, ydata)
+            torch.save(datas, "./autoencoded_data.pt")
+
         return TensorDataset(zdata, ydata)
-    
+
     def forward(self, x):
         e = self.model(x)
 

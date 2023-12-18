@@ -41,37 +41,39 @@ class UNetTransformer(pl.LightningModule):
         self.marg_prob_fun = functools.partial(
             self._marginal_prob_std, sigma=self.sigma
         )
-        
+
         if self.use_latent_unet:
-            self.model = LatentUnetTransformerModel(self.marg_prob_fun, channels=[4,16,32,64])
-            self.autoencoder_model = AutoEncoderModule.load_from_checkpoint(self.autoencoder_model)
+            self.model = LatentUnetTransformerModel(
+                self.marg_prob_fun, channels=[4, 16, 32, 64]
+            )
+            self.autoencoder_model = AutoEncoderModule.load_from_checkpoint(
+                self.autoencoder_model
+            )
             self.autoencoder_model.to(device)
             self.autoencoder_model.eval()
         else:
             self.model = UnetTransformerModel(self.marg_prob_fun)
-            
+
         self.model.to(device)
         self.model_params = list(self.model.parameters())
-            
 
     def _setup_data(self):
-
         if self.use_latent_unet:
             dataset = self.autoencoder_model.create_latent_sapce(self.batch_size)
         else:
-            dataset = MNIST(".", train=True, transform=transfroms.ToTensor(), download=True)
-            
+            dataset = MNIST(
+                ".", train=True, transform=transfroms.ToTensor(), download=True
+            )
+
         # use 20% of training data for validation
         train_set_size = int(len(dataset) * 0.95)
         valid_set_size = len(dataset) - train_set_size
-        
+
         # split the train set into two
         seed = torch.Generator().manual_seed(42)
         self.train_dataset, self.val_dataset = data.random_split(
             dataset, [train_set_size, valid_set_size], generator=seed
         )
-
-        
 
     def _marginal_prob_std(self, time_step, sigma) -> torch.Tensor:
         """Compute the mean and standard deviation of p_{0t}(x(t) | x(0)).
@@ -218,7 +220,7 @@ class UNetTransformer(pl.LightningModule):
             persistent_workers=True,
             timeout=30,
         )
-        
+
     # @staticmethod
     # def add_model_specific_args(parent_parser):
     #     parser = parent_parser.add_argument_group("Transformer Model")

@@ -47,7 +47,7 @@ def test_UnetTransformer(args):
     digit = 4
     module.batch_size = sample_num
     y = digit * torch.ones(sample_num, dtype=torch.long)
-    samples = module._euler_maruyam_sampler(y=y.to(device), x_shape=(4,10,10))
+    samples = module._euler_maruyam_sampler(y=y.to(device), x_shape=(4, 10, 10))
 
     samples = samples.clamp(0.0, 1.0)
     sample_grid = make_grid(samples, nrow=int(np.sqrt(sample_num)))
@@ -57,7 +57,9 @@ def test_UnetTransformer(args):
     plt.imshow(sample_grid.permute(1, 2, 0).cpu(), vmin=0.0, vmax=1.0)
     plt.savefig(save_path / "samples_scorebased_Unet_Latent.png")
 
-    visualize_digit_embedding(module.model.cond_embed.weight.data, save_path,'latent_model')
+    visualize_digit_embedding(
+        module.model.cond_embed.weight.data, save_path, "latent_model"
+    )
 
 
 def test_autoencoder(args):
@@ -68,24 +70,27 @@ def test_autoencoder(args):
     module = AutoEncoderModule.load_from_checkpoint(args.model)
     module.to(device)
     module.eval()
-    data_loader = DataLoader(module.val_dataset, batch_size=module.batch_size, shuffle=False, num_workers=4)
+    data_loader = DataLoader(
+        module.val_dataset, batch_size=module.batch_size, shuffle=False, num_workers=4
+    )
 
     x, y = next(iter(data_loader))
     x_hat = module(x.to(device)).cpu()
-    
-    plt.figure(figsize=(6,6.5))
-    plt.axis('off')
-    plt.imshow(make_grid(x[:64,:,:,:].cpu()).permute([1,2,0]), vmin=0., vmax=1.)
+
+    plt.figure(figsize=(6, 6.5))
+    plt.axis("off")
+    plt.imshow(make_grid(x[:64, :, :, :].cpu()).permute([1, 2, 0]), vmin=0.0, vmax=1.0)
     plt.title("Original")
     plt.savefig(save_path / "ae_original.png")
 
-    plt.figure(figsize=(6,6.5))
-    plt.axis('off')
-    plt.imshow(make_grid(x_hat[:64,:,:,:].cpu()).permute([1,2,0]), vmin=0., vmax=1.)
+    plt.figure(figsize=(6, 6.5))
+    plt.axis("off")
+    plt.imshow(
+        make_grid(x_hat[:64, :, :, :].cpu()).permute([1, 2, 0]), vmin=0.0, vmax=1.0
+    )
     plt.title("AE Reconstructed")
     plt.savefig(save_path / "ae_recnstructed.png")
-    
-    
+
 
 @torch.no_grad()
 def main(args):
@@ -104,5 +109,7 @@ if __name__ == "__main__":
         "--test-unettransforme", action="store_true", help="Transformer Model"
     )
     parser.add_argument("--test-simpleunet", action="store_true", help="UNet Model")
-    parser.add_argument("--test-autoencoder", action="store_true", help="AutoEncoder Model") 
+    parser.add_argument(
+        "--test-autoencoder", action="store_true", help="AutoEncoder Model"
+    )
     main(parser.parse_args())
