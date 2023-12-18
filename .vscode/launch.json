@@ -16,10 +16,10 @@
                 //"--image-to-image",
                 //"--test-custom-unet",
                 //"--test-minst-unet",
-                "--test-minst-unettr",
-                //"--model",
-                //"/d/ML_AI_DL_Projects/projects_repo/stable-diffusion-models/simple_unet_test/test_AE/version_1/checkpoints/epoch=49-step=1400.ckpt",
-                //"--test-unettransforme"
+                //"--test-minst-unettr",
+                "--model",
+                "/d/ML_AI_DL_Projects/projects_repo/stable-diffusion-models/simple_unet_test/test_UnetTR/version_1/checkpoints/epoch=149-step=8400-v1.ckpt",
+                "--test-unettransforme"
                 //"--test-autoencoder"
             ],
         }

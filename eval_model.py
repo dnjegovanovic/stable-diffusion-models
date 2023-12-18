@@ -47,7 +47,7 @@ def test_UnetTransformer(args):
     digit = 4
     module.batch_size = sample_num
     y = digit * torch.ones(sample_num, dtype=torch.long)
-    samples = module._euler_maruyam_sampler(y=y.to(device))
+    samples = module._euler_maruyam_sampler(y=y.to(device), x_shape=(4,10,10))
 
     samples = samples.clamp(0.0, 1.0)
     sample_grid = make_grid(samples, nrow=int(np.sqrt(sample_num)))
@@ -55,9 +55,9 @@ def test_UnetTransformer(args):
     plt.figure(figsize=(6, 6))
     plt.axis("off")
     plt.imshow(sample_grid.permute(1, 2, 0).cpu(), vmin=0.0, vmax=1.0)
-    plt.savefig(save_path / "samples_scorebased_Unet.png")
+    plt.savefig(save_path / "samples_scorebased_Unet_Latent.png")
 
-    visualize_digit_embedding(module.model.cond_embed.weight.data, save_path)
+    visualize_digit_embedding(module.model.cond_embed.weight.data, save_path,'latent_model')
 
 
 def test_autoencoder(args):
